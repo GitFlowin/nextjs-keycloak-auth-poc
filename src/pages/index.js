@@ -1,8 +1,7 @@
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
-import { Issuer } from 'openid-client';
+import keycloak from '../lib/keycloak';
 
 const Home = ({ authUrl }) => {
   const router = useRouter();
@@ -29,18 +28,9 @@ const Home = ({ authUrl }) => {
 };
 
 export async function getServerSideProps(context) {
-  const keycloakIssuer = await Issuer.discover(
-    `https://digitalu.info/auth/realms/digital-university`
-  );
-
-  const keycloakClient = new keycloakIssuer.Client({
-    client_id: 'auth-poc',
-    redirect_uris: ['http://localhost:3000/'],
-    response_types: ['code'],
-  });
+  const keycloakClient = await keycloak();
 
   const authUrl = keycloakClient.authorizationUrl();
-  console.log(authUrl);
 
   return {
     props: {
